@@ -3,16 +3,23 @@
 > This fork's `master` contains upstream PR #475 (`new-design`) **plus** a
 > TopBar/tray **EN ⇄ বাং language toggle button**, built and tested on
 > **Linux Mint 22.3** (Ubuntu 24.04 Noble base, Cinnamon, X11).
-> Upstream README lives in `README.adoc`.
+> Upstream docs were moved intact to `UPSTREAM-README.adoc`
+> (Bengali: `UPSTREAM-README-BN.adoc`).
 
-## What was added on top of PR #475
+## What's in this fork
+
+- **Base:** upstream PR #475 `new-design` branch (new Settings dialog, dynamic
+  Layout Viewer, layout JSON v3) — built as version 3.0.0 with the IBus backend.
+- **Added:** TopBar + system-tray **EN ⇄ বাং toggle button**
+  (`src/frontend/TopBar.{h,cpp,ui}`) — click to switch Bangla/English.
+- **Below:** full step-by-step notes of everything done on the Mint machine
+  (build fixes, crash fix, hotkey investigation).
+
+## Setup notes (Linux Mint 22.3)
 
 Environment: **Linux Mint 22.3 Zena** (Ubuntu 24.04 Noble base), **Cinnamon**, X11, x86_64.
 
-This document explains everything that was done on this machine, step by step,
-so it can be reproduced or reviewed.
-
-## 1. Removed `ibus-avro`, installed OpenBangla Keyboard 2.0.0
+### 1. Removed `ibus-avro`, installed OpenBangla Keyboard 2.0.0
 
 ```bash
 sudo apt remove -y ibus-avro
@@ -31,7 +38,7 @@ gsettings set org.freedesktop.ibus.panel show-im-name true
 TopBar autostart entry created at `~/.config/autostart/openbangla-keyboard.desktop`
 so the floating TopBar survives reboots.
 
-## 2. Built and installed PR #475 — “New UI/UX Design”
+### 2. Built and installed PR #475 — “New UI/UX Design”
 
 PR: `OpenBangla/OpenBangla-Keyboard#475` (open, branch `new-design` @ `1eca2da`,
 6 commits: Settings dialog redesign, Layout Viewer redesign, layout JSON v3, …).
@@ -67,7 +74,7 @@ sudo cmake --install build
 Result: version **3.0.0**, GUI at `/usr/bin/openbangla-gui`,
 engine at `/usr/libexec/ibus-engine-openbangla`.
 
-## 3. Fixed engine crash on startup (stale 2.0.0 setting)
+### 3. Fixed engine crash on startup (stale 2.0.0 setting)
 
 Symptom: `ibus engine OpenBangla` timed out (`Set global engine failed`);
 running the engine manually showed a Rust panic:
@@ -89,7 +96,7 @@ name=Avro Phonetic
 path=avro_phonetic
 ```
 
-## 4. Language-switching investigation (the deep part)
+### 4. Language-switching investigation (the deep part)
 
 Goal: switch Bangla ⇄ English with a keypress.
 
@@ -126,7 +133,7 @@ Findings, each verified with `xdotool`-synthesized keys and `ibus engine` reads:
 Working result: `F12` toggles EN ⇄ বাং reliably; `Win+Space` works when
 NumLock is off.
 
-## 5. EN/বাং toggle button (feature commit on top of PR #475)
+### 5. EN/বাং toggle button (feature commit on top of PR #475)
 
 Files changed: `src/frontend/TopBar.{h,cpp,ui}` (+112 lines).
 
@@ -144,7 +151,7 @@ Files changed: `src/frontend/TopBar.{h,cpp,ui}` (+112 lines).
   on-screen coordinates and reading `ibus engine` both ways
   (plus `strace` confirming click → `ibus engine …` execution).
 
-## 6. Current working config recap (Mint/Cinnamon)
+### 6. Current working config recap (Mint/Cinnamon)
 
 - IBus preload: `['xkb:us::eng', 'OpenBangla']`, panel always shown.
 - Cinnamon sources include `('ibus', 'OpenBangla')`; switch keys `Super+Space` + `F12`.
