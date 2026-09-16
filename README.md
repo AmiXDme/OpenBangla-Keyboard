@@ -1,4 +1,11 @@
-# OpenBangla Keyboard on Mint 22.3 — Setup Notes (PR #475 + EN/বাং Toggle Button)
+# OpenBangla Keyboard — PR #475 (New UI/UX) + EN/বাং Toggle Button
+
+> This fork's `master` contains upstream PR #475 (`new-design`) **plus** a
+> TopBar/tray **EN ⇄ বাং language toggle button**, built and tested on
+> **Linux Mint 22.3** (Ubuntu 24.04 Noble base, Cinnamon, X11).
+> Upstream README lives in `README.adoc`.
+
+## What was added on top of PR #475
 
 Environment: **Linux Mint 22.3 Zena** (Ubuntu 24.04 Noble base), **Cinnamon**, X11, x86_64.
 
