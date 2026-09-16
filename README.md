@@ -15,6 +15,26 @@
 - **Below:** full step-by-step notes of everything done on the Mint machine
   (build fixes, crash fix, hotkey investigation).
 
+## What was fixed
+
+1. **Build failure (Rust too old):** Ubuntu Noble's Rust 1.75 can't parse this
+   branch's lockfile-v4 `Cargo.lock` → installed Rust 1.98 via rustup.
+2. **Engine crash on startup:** stale 2.0.0 setting pointed `layout/path` at the
+   on-disk `avrophonetic.json`, which the new engine misreads as a *fixed*
+   layout → `unwrap()` panic in `riti/src/fixed/method.rs:109`. Fixed by using
+   the built-in id `avro_phonetic` (details in §3 below).
+3. **No way to switch language by key:** IBus's own hotkeys never fire on this
+   system, and Cinnamon was grabbing `Super+Space` for an input list that
+   didn't include OpenBangla. Fixed with Cinnamon-native switching
+   (`('ibus', 'OpenBangla')` source + `Super+Space`/`F12` binding, details in §4).
+4. **NumLock breaks combo hotkeys:** with NumLock ON, Cinnamon ignores
+   `Super+Space`/`Ctrl+Space` — covered by adding single-key `F12`.
+5. **Toggle button one-way bug:** `QAbstractButton::setChecked()` is a no-op on
+   non-checkable buttons, so Bangla→English never worked. Fixed with
+   `checkable=true` + reading the clicked state as the desired state.
+6. **This README was invisible:** GitHub renders `README.adoc` over
+   `README.md`, so upstream docs were moved intact to `UPSTREAM-README*.adoc`.
+
 ## Setup notes (Linux Mint 22.3)
 
 Environment: **Linux Mint 22.3 Zena** (Ubuntu 24.04 Noble base), **Cinnamon**, X11, x86_64.
