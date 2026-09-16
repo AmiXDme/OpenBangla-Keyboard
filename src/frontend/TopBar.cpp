@@ -26,6 +26,10 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QDir>
+#include <QTimer>
+#include <QProcess>
+#include <QStandardPaths>
+#include <QDateTime>
 #include "TopBar.h"
 #include "Layout.h"
 #include "Settings.h"
@@ -91,6 +95,7 @@ TopBar::TopBar(bool darkIcon, QWidget *parent) :
   SetupTopBar();
   SetupPopupMenus();
   SetupTrayIcon();
+  SetupLangToggle();
   DataMigration();
   notifyTrayStart(tray);
 }
@@ -231,6 +236,13 @@ void TopBar::SetupTrayIcon() {
   connect(trayQuit, &QAction::triggered, this, &TopBar::on_buttonShutdown_clicked);
 
   trayMenu = new QMenu(this);
+  trayLangToggle = new QAction("Bangla (বাংলা)", this);
+  trayLangToggle->setCheckable(true);
+  connect(trayLangToggle, &QAction::triggered, this, [&]() {
+    applyLanguage(trayLangToggle->isChecked());
+  });
+  trayMenu->addAction(trayLangToggle);
+  trayMenu->addSeparator();
   trayMenu->addMenu(layoutMenu); // Layout Menu
   trayMenu->addMenu(trayOutputMode);
   trayMenu->addAction(trayLayoutViewer);
@@ -429,6 +441,58 @@ void TopBar::on_buttonViewLayout_clicked() {
 void TopBar::on_buttonSettings_clicked() {
   settingsDialog->updateSettings();
   settingsDialog->show();
+}
+
+void TopBar::SetupLangToggle() {
+  // Language toggle works through the IBus engine. Hide it when
+  // the `ibus` helper is unavailable (e.g. Fcitx-only setups).
+  if (QStandardPaths::findExecutable("ibus").isEmpty()) {
+    ui->buttonLangToggle->hide();
+    return;
+  }
+  ui->buttonLangToggle->show();
+  langTogglePollTimer = new QTimer(this);
+  connect(langTogglePollTimer, &QTimer::timeout, this, &TopBar::refreshLangToggleState);
+  langTogglePollTimer->start(1000);
+  refreshLangToggleState();
+}
+
+void TopBar::refreshLangToggleState() {
+  if (langEngineQueryRunning) return;
+  // Skip polling briefly after a manual toggle so the in-flight
+  // engine switch is not misread as the old state.
+  if (QDateTime::currentMSecsSinceEpoch() - lastLangToggleMsecs < 1500) return;
+  QProcess *proc = new QProcess(this);
+  connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+          this, [=](int exitCode, QProcess::ExitStatus status) {
+    if (status == QProcess::NormalExit && exitCode == 0) {
+      QString engine = QString::fromUtf8(proc->readAllStandardOutput()).trimmed();
+      setLangToggleState(engine.compare("OpenBangla", Qt::CaseInsensitive) == 0);
+    }
+    langEngineQueryRunning = false;
+    proc->deleteLater();
+  });
+  langEngineQueryRunning = true;
+  proc->start("ibus", QStringList() << "engine");
+}
+
+void TopBar::setLangToggleState(bool bangla) {
+  ui->buttonLangToggle->setChecked(bangla);
+  ui->buttonLangToggle->setText(bangla ? QString::fromUtf8("বাং") : "EN");
+  if (trayLangToggle) trayLangToggle->setChecked(bangla);
+}
+
+void TopBar::applyLanguage(bool bangla) {
+  lastLangToggleMsecs = QDateTime::currentMSecsSinceEpoch();
+  setLangToggleState(bangla); // optimistic update, the poller confirms it
+  QProcess::startDetached("ibus", QStringList() << "engine"
+                          << (bangla ? "OpenBangla" : "xkb:us::eng"));
+}
+
+void TopBar::on_buttonLangToggle_clicked() {
+  // The button is checkable, so a click already flipped its state;
+  // the flipped state is exactly what the user wants.
+  applyLanguage(ui->buttonLangToggle->isChecked());
 }
 
 /**

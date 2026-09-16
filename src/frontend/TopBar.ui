@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
+    <width>314</width>
     <height>40</height>
    </rect>
   </property>
@@ -55,6 +55,18 @@ QPushButton:pressed {
 QPushButton#buttonSetLayout:checked {
     background: rgba(14, 165, 233, 0.15);
     border: 1px solid rgba(14, 165, 233, 0.2);
+    border-radius: 10px;
+}
+
+QPushButton#buttonLangToggle {
+    font-weight: bold;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+QPushButton#buttonLangToggle:checked {
+    background: rgba(14, 165, 233, 0.25);
+    border: 1px solid rgba(14, 165, 233, 0.4);
     border-radius: 10px;
 }
 
@@ -181,6 +193,25 @@ QToolTip {
       <width>28</width>
       <height>24</height>
      </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonLangToggle">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>0</y>
+      <width>54</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Switch between Bangla and English</string>
+    </property>
+    <property name="text">
+     <string>বাং</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

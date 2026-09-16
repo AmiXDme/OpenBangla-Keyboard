@@ -35,6 +35,8 @@ class QSystemTrayIcon;
 
 class LayoutViewer;
 
+class QTimer;
+
 class AboutDialog;
 
 class AboutFile;
@@ -72,6 +74,8 @@ private slots:
 
   void on_buttonSetLayout_clicked();
 
+  void on_buttonLangToggle_clicked();
+
   void on_buttonShutdown_clicked();
 
   void on_buttonViewLayout_clicked();
@@ -85,6 +89,9 @@ private:
   bool positionChanged = false;
   int pressedMouseX, pressedMouseY;
   QSystemTrayIcon *tray;
+  QTimer *langTogglePollTimer = nullptr;
+  bool langEngineQueryRunning = false;
+  qint64 lastLangToggleMsecs = 0;
 
   /* Dialogs */
   AboutDialog *aboutDialog;
@@ -108,6 +115,7 @@ private:
 
   /* Tray Popup Menu */
   QMenu *trayMenu;
+  QAction *trayLangToggle;
   QMenu *trayOutputMode;
   QAction *trayOutputModeUnicode;
   QAction *trayOutputModeANSI;
@@ -122,6 +130,14 @@ private:
   void SetupPopupMenus();
 
   void SetupTrayIcon();
+
+  void SetupLangToggle();
+
+  void refreshLangToggleState();
+
+  void setLangToggleState(bool bangla);
+
+  void applyLanguage(bool bangla);
 
   void checkForUpdate();
 
